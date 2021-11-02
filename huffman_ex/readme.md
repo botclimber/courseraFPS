@@ -1,4 +1,4 @@
-# Patmat exercise solved
+# Patmat exercise not solved
 
 Huffman stuff, also u can check this article to get a better understanding:  
 - Simple explanation (https://www.researchgate.net/publication/304395425_Huffman_coding) (**recommended**)  
