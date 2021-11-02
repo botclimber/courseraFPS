@@ -32,7 +32,7 @@ class Tweet(val user: String, val text: String, val retweets: Int):
  * [1] http://en.wikipedia.org/wiki/Binary_search_tree
  */
 abstract class TweetSet extends TweetSetInterface:
-
+  def empty: Boolean
   /**
    * This method takes a predicate and returns a subset of all the elements
    * in the original set for which the predicate is true.
@@ -53,7 +53,7 @@ abstract class TweetSet extends TweetSetInterface:
    * Question: Should we implment this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def union(that: TweetSet): TweetSet = ???
+  def union(that: TweetSet): TweetSet
 
   /**
    * Returns the tweet from this set which has the greatest retweet count.
@@ -64,7 +64,7 @@ abstract class TweetSet extends TweetSetInterface:
    * Question: Should we implment this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def mostRetweeted: Tweet = ???
+  def mostRetweeted: Tweet
 
   /**
    * Returns a list containing all tweets of this set, sorted by retweet count
@@ -75,7 +75,7 @@ abstract class TweetSet extends TweetSetInterface:
    * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def descendingByRetweet: TweetList = ???
+  def descendingByRetweet: TweetList
 
   /**
    * The following methods are already implemented
@@ -110,6 +110,11 @@ class Empty extends TweetSet:
   /**
    * The following methods are already implemented
    */
+  def empty: Boolean = true
+  def mostRetweeted: Tweet = throw new NoSuchElementException
+  def descendingByRetweet: TweetList = Nil
+
+  def union(that: TweetSet): TweetSet = that
 
   def contains(tweet: Tweet): Boolean = false
 
@@ -129,6 +134,25 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet:
   /**
    * The following methods are already implemented
    */
+  def empty: Boolean = false
+
+  def mostRetweeted: Tweet =
+
+    if !left.empty && left.mostRetweeted.retweets > elem.retweets then
+      if !right.empty && right.mostRetweeted.retweets > left.mostRetweeted.retweets then
+        right.mostRetweeted
+      else
+        left.mostRetweeted
+    else if !right.empty && right.mostRetweeted.retweets > elem.retweets then
+      right.mostRetweeted
+    else
+      elem
+
+  def descendingByRetweet: TweetList =
+    new Cons(mostRetweeted, remove(mostRetweeted).descendingByRetweet)
+
+  def union(that: TweetSet): TweetSet =
+    left.union(right.union(that)).incl(elem)
 
   def contains(x: Tweet): Boolean =
     if x.text < elem.text then
