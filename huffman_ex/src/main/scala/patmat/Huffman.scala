@@ -100,11 +100,13 @@ trait Huffman extends HuffmanInterface:
    * unchanged.
    */
   def combine(trees: List[CodeTree]): List[CodeTree] =
-    if trees.size < 2 then trees
+    // isEmpty or Nil or trees.size < 2
+    if trees.tail.tail.isEmpty then trees
     else
-      // remove first two
-      // merge them
-      // add
+      // fork 2 first elements (assuming that list wll always come sorted)
+      // remove 2 first elements and add merge
+      // sort
+      (makeCodeTree(trees(0), trees(1)) :: trees.drop(2)).sortBy(weight)
 
   /**
    * This function will be called in the following way:
@@ -117,15 +119,17 @@ trait Huffman extends HuffmanInterface:
    * In such an invocation, `until` should call the two functions until the list of
    * code trees contains only one single tree, and then return that singleton list.
    */
-  def until(done: List[CodeTree] => Boolean, merge: List[CodeTree] => List[CodeTree])(trees: List[CodeTree]): List[CodeTree] = ???
-
+  def until(done: List[CodeTree] => Boolean, merge: List[CodeTree] => List[CodeTree])(trees: List[CodeTree]): List[CodeTree] =
+    if done(trees) then trees
+    else merge(trees)
   /**
    * This function creates a code tree which is optimal to encode the text `chars`.
    *
    * The parameter `chars` is an arbitrary text. This function extracts the character
    * frequencies from that text and creates a code tree based on them.
    */
-  def createCodeTree(chars: List[Char]): CodeTree = ???
+  def createCodeTree(chars: List[Char]): CodeTree =
+    until(singleton,combine)(makeOrderedLeafList(times(chars))).head
 
 
   // Part 3: Decoding
@@ -136,7 +140,7 @@ trait Huffman extends HuffmanInterface:
    * This function decodes the bit sequence `bits` using the code tree `tree` and returns
    * the resulting list of characters.
    */
-  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = ???
+  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = 
 
   /**
    * A Huffman coding tree for the French language.
