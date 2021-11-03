@@ -6,6 +6,8 @@ class HuffmanSuite extends munit.FunSuite:
   trait TestTrees {
     val t1 = Fork(Leaf('a',2), Leaf('b',3), List('a','b'), 5)
     val t2 = Fork(Fork(Leaf('a',2), Leaf('b',3), List('a','b'), 5), Leaf('d',4), List('a','b','d'), 9)
+
+    val codeT: CodeTable = List(('a',List(0,1)),('b', List(1,1)), ('c', List(1,0,1)), ('d', List(1,1,1)))
   }
 
 
@@ -38,9 +40,25 @@ class HuffmanSuite extends munit.FunSuite:
 
   test("decode and encode a very short text should be identity (10pts)") {
     new TestTrees:
-      assertEquals(decode(t1, encode(t1)("ab".toList)), "ab".toList)
+      assertEquals(decode(t2, encode(t2)("abd".toList)), "abd".toList)
   }
 
+  test("codeBits test") {
+    new TestTrees:
+      assertEquals(codeBits(codeT)('c'), List(1,0,1))
+      assertEquals(codeBits(codeT)('a'), List(0,1))
+      assertEquals(codeBits(codeT)('d'), List(1,1,1))
+  }
+
+  test("convert test") {
+    new TestTrees:
+      assertEquals(convert(t2),  List(('a',List(0, 0)), ('b',List(0, 1)), ('d',List(1))))
+  }
+
+  test("quickEncode test") {
+    new TestTrees:
+      assertEquals(quickEncode(t2)("ab".toList),  List(0, 0, 0, 1))
+  }
 
   import scala.concurrent.duration.*
   override val munitTimeout = 10.seconds
