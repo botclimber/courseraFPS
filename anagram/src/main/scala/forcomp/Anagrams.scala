@@ -35,10 +35,12 @@ object Anagrams extends AnagramsInterface:
    *
    *  Note: you must use `groupBy` to implement this method!
    */
-  def wordOccurrences(w: Word): Occurrences = ???
+  def wordOccurrences(w: Word): Occurrences =
+    w.toLowerCase().toList.groupBy(x => x).map((x,y) => (x, y.size)).toList.sorted
 
   /** Converts a sentence into its character occurrence list. */
-  def sentenceOccurrences(s: Sentence): Occurrences = ???
+  def sentenceOccurrences(s: Sentence): Occurrences = wordOccurrences(s.mkString)
+
 
   /** The `dictionaryByOccurrences` is a `Map` from different occurrences to a sequence of all
    *  the words that have that occurrence count.
@@ -55,10 +57,12 @@ object Anagrams extends AnagramsInterface:
    *    List(('a', 1), ('e', 1), ('t', 1)) -> Seq("ate", "eat", "tea")
    *
    */
-  lazy val dictionaryByOccurrences: Map[Occurrences, List[Word]] = ???
+  lazy val dictionaryByOccurrences: Map[Occurrences, List[Word]] = dictionary.groupBy(x => wordOccurrences(x))
 
   /** Returns all the anagrams of a given word. */
-  def wordAnagrams(word: Word): List[Word] = ???
+  def wordAnagrams(word: Word): List[Word] =
+    dictionaryByOccurrences(wordOccurrences(word))
+
 
   /** Returns the list of all subsets of the occurrence list.
    *  This includes the occurrence itself, i.e. `List(('k', 1), ('o', 1))`
@@ -82,7 +86,29 @@ object Anagrams extends AnagramsInterface:
    *  Note that the order of the occurrence list subsets does not matter -- the subsets
    *  in the example above could have been displayed in some other order.
    */
-  def combinations(occurrences: Occurrences): List[Occurrences] = ???
+  /*def combinations(occurrences: Occurrences): List[Occurrences] =
+    occurrences match {
+      case List() => List(List())
+      case (c,x) :: os =>
+        (for{i <- 0 to x; oss <- combinations(os)} yield  (c,i) :: oss)
+          .toList.map( _.filterNot(_._2 == 0))
+    }*/
+  def combinations(occurrences: Occurrences): List[Occurrences] =
+    List() :: (for {
+      (char, max) <- occurrences
+      count <- 1 to max
+      rest <- combinations(occurrences.filter(pair => pair._1 > char))
+    } yield List((char, count)) ++ rest)
+
+    List() :: (for {
+      (char, max) <- occurrences
+      count <- 1 to max
+      rest <- combinations(occurrences.filter(pair => pair._1 > char))
+    } yield List((char, count)) ++ rest)
+
+    List() :: occurrences.foreach({
+
+    })
 
   /** Subtracts occurrence list `y` from occurrence list `x`.
    *
