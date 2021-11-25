@@ -86,29 +86,13 @@ object Anagrams extends AnagramsInterface:
    *  Note that the order of the occurrence list subsets does not matter -- the subsets
    *  in the example above could have been displayed in some other order.
    */
-  /*def combinations(occurrences: Occurrences): List[Occurrences] =
-    occurrences match {
-      case List() => List(List())
-      case (c,x) :: os =>
-        (for{i <- 0 to x; oss <- combinations(os)} yield  (c,i) :: oss)
-          .toList.map( _.filterNot(_._2 == 0))
-    }*/
+
   def combinations(occurrences: Occurrences): List[Occurrences] =
-    List() :: (for {
-      (char, max) <- occurrences
-      count <- 1 to max
-      rest <- combinations(occurrences.filter(pair => pair._1 > char))
-    } yield List((char, count)) ++ rest)
-
-    List() :: (for {
-      (char, max) <- occurrences
-      count <- 1 to max
-      rest <- combinations(occurrences.filter(pair => pair._1 > char))
-    } yield List((char, count)) ++ rest)
-
-    List() :: occurrences.foreach({
-
-    })
+      List() :: (for {
+        (char, max) <- occurrences
+        count <- 1 to max
+        remaining <- combinations(occurrences.filter(x => x(0) > char))
+      } yield List((char, count)) ++ remaining)
 
   /** Subtracts occurrence list `y` from occurrence list `x`.
    *
@@ -120,7 +104,12 @@ object Anagrams extends AnagramsInterface:
    *  Note: the resulting value is an occurrence - meaning it is sorted
    *  and has no zero-entries.
    */
-  def subtract(x: Occurrences, y: Occurrences): Occurrences = ???
+  def subtract(x: Occurrences, y: Occurrences): Occurrences =
+    y.foldLeft(x){
+    (x, y) => for {
+      x <- x
+    } yield (x(0), if x(0) == y(0) then x(1) - y(1) else x(1)) //x - y
+  }.filter(_(1) > 0)
 
   /** Returns a list of all anagram sentences of the given sentence.
    *
@@ -162,7 +151,18 @@ object Anagrams extends AnagramsInterface:
    *
    *  Note: There is only one anagram of an empty sentence.
    */
-  def sentenceAnagrams(sentence: Sentence): List[Sentence] = ???
+  def sentenceAnagrams(sentence: Sentence): List[Sentence] =
+    def eachAnag(o: Occurrences): List[Sentence] = o match {
+      case List() => List(Nil)
+      case _ =>
+        for {
+          c <- combinations(o)
+          w <- dictionaryByOccurrences.getOrElse(c, Nil)
+          s <- eachAnag(subtract(o, wordOccurrences(w)))
+        } yield w :: s
+    }
+
+    eachAnag(sentenceOccurrences(sentence))
 
 object Dictionary:
   def loadDictionary: List[String] =

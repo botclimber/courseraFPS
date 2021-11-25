@@ -38,6 +38,12 @@ class AnagramsSuite extends munit.FunSuite:
     val lad = List(('a', 1), ('d', 1), ('l', 1))
     assertEquals(subtract(lard, r), lad)
   }
+  test("subtract: among - r,d,d (undefined)") {
+  val lard = List(('a', 1), ('g', 1), ('m', 1), ('n', 1), ('o', 1))
+  val r = List(('r', 1),('d', 2))
+  val lad = List(('a', 1), ('g', 1), ('m', 1), ('n', 1), ('o', 1))
+  assertEquals(subtract(lard, r), lad)
+  }
 
 
   test("combinations: [] (8pts)") {
